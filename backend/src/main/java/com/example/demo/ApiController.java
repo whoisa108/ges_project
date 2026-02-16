@@ -67,9 +67,22 @@ public class ApiController {
             resp.put("role", u.getRole());
             resp.put("name", u.getName());
             resp.put("employeeId", u.getEmployeeId());
+            resp.put("needsPasswordReset", u.isNeedsPasswordReset());
             return ResponseEntity.ok(resp);
         }
         return ResponseEntity.status(401).body("Invalid credentials");
+    }
+
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String newPassword = body.get("password");
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
+        user.setPassword(encoder.encode(newPassword));
+        user.setNeedsPasswordReset(false);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok("Password updated");
     }
 
     // --- PROPOSALS ---
@@ -153,6 +166,21 @@ public class ApiController {
         if (!"ADMIN".equals(user.getRole())) return ResponseEntity.status(403).build();
         userRepository.deleteById(id);
         return ResponseEntity.ok("User deleted");
+    }
+
+    @PostMapping("/admin/set-password")
+    public ResponseEntity<?> setPassword(@RequestBody Map<String, String> body) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!"ADMIN".equals(user.getRole())) return ResponseEntity.status(403).build();
+        
+        Optional<User> userOpt = userRepository.findByEmployeeId(body.get("employeeId"));
+        if (userOpt.isPresent()) {
+            User u = userOpt.get();
+            u.setPassword(encoder.encode(body.get("password")));
+            userRepository.save(u);
+            return ResponseEntity.ok("Password updated");
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/admin/deadline")

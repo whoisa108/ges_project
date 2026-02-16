@@ -25,7 +25,12 @@ const LoginPage = () => {
       localStorage.setItem('esg_role', res.data.role);
       localStorage.setItem('esg_user_name', res.data.name);
       localStorage.setItem('esg_employee_id', res.data.employeeId);
-      navigate(res.data.role === 'ADMIN' ? '/admin' : '/dashboard');
+
+      if (res.data.needsPasswordReset) {
+        navigate('/reset-password');
+      } else {
+        navigate(res.data.role === 'ADMIN' ? '/admin' : '/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data || '登入失敗');
     }
@@ -56,6 +61,43 @@ const LoginPage = () => {
           <button onClick={() => navigate('/register')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginLeft: '5px' }}>設定帳號</button>
         </div>
       </motion.div>
+    </div>
+  );
+};
+
+const ResetPasswordPage = () => {
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const navigate = useNavigate();
+
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirm) return alert('密碼不一致');
+    try {
+      await api.post('/auth/reset-password', { password });
+      alert('密碼重設成功，請重新登入');
+      localStorage.clear();
+      navigate('/login');
+    } catch (e) { alert('重設失敗'); }
+  };
+
+  return (
+    <div className="flex" style={{ height: '100vh', justifyContent: 'center' }}>
+      <div className="card glass" style={{ width: '400px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>安全性要求：請更換密碼</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '30px', textAlign: 'center' }}>您的帳號為初始密碼，請設定新密碼以利繼續使用。</p>
+        <form onSubmit={handleReset}>
+          <div className="form-group">
+            <label>新密碼</label>
+            <input className="form-input" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>確認新密碼</label>
+            <input className="form-input" type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} />
+          </div>
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>更新密碼並重新登入</button>
+        </form>
+      </div>
     </div>
   );
 };
@@ -408,6 +450,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/propose" element={<ProtectedRoute><ProposePage /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />

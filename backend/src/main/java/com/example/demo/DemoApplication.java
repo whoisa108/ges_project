@@ -61,6 +61,7 @@ public class DemoApplication {
                 admin.setPassword(encoder.encode("admin123"));
                 admin.setRole("ADMIN");
                 admin.setDepartment("SYSTEM");
+                admin.setNeedsPasswordReset(true); // 強制重設
                 repo.save(admin);
             }
         };
@@ -91,6 +92,7 @@ class User {
     private String department;
     private String password;
     private String role;
+    private boolean needsPasswordReset;
 
     // Getters and Setters
     public String getId() { return id; }
@@ -105,6 +107,8 @@ class User {
     public void setPassword(String password) { this.password = password; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public boolean isNeedsPasswordReset() { return needsPasswordReset; }
+    public void setNeedsPasswordReset(boolean needsPasswordReset) { this.needsPasswordReset = needsPasswordReset; }
 }
 
 @Document(collection = "proposals")
