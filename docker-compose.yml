@@ -20,6 +20,26 @@ services:
     volumes:
       - minio_data:/data
 
+  backend:
+    build: ./backend
+    container_name: esg-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - minio
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/esg_db
+      - MINIO_URL=http://minio:9000
+
+  frontend:
+    build: ./frontend
+    container_name: esg-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
 volumes:
   mongodb_data:
   minio_data:

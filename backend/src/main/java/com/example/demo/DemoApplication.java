@@ -66,15 +66,19 @@ public class DemoApplication {
         };
     }
 
+    // InitDeadline
     @Bean
-    public org.springframework.web.servlet.config.annotation.WebMvcConfigurer corsConfigurer() {
-        return new org.springframework.web.servlet.config.annotation.WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
-                registry.addMapping("/api/**").allowedOrigins("*").allowedMethods("*");
+    public org.springframework.boot.CommandLineRunner initDeadline(SettingRepository repo) {
+        return args -> {
+            if (repo.findByKey("deadline").isEmpty()) {
+                Setting setting = new Setting();
+                setting.setKey("deadline");
+                setting.setValue(LocalDateTime.of(2026, 3, 17, 23, 59, 59).toString());
+                repo.save(setting);
             }
         };
     }
+
 }
 
 // --- MODELS ---
