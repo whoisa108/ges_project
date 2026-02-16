@@ -143,6 +143,10 @@ public class ApiController {
         
         if (p.isPresent()) {
             if ("ADMIN".equals(user.getRole()) || p.get().getCreatorId().equals(user.getEmployeeId())) {
+                // Delete file from MinIO first
+                if (p.get().getFileName() != null) {
+                    storageService.deleteFile(p.get().getFileName());
+                }
                 proposalRepository.deleteById(id);
                 return ResponseEntity.ok("Deleted");
             }

@@ -324,6 +324,13 @@ class StorageService {
             return fileName;
         } catch (Exception e) { throw new RuntimeException("Upload failed", e); }
     }
+
+    public void deleteFile(String fileName) {
+        try {
+            minioClient.removeObject(io.minio.RemoveObjectArgs.builder()
+                .bucket(bucket).object(fileName).build());
+        } catch (Exception e) { System.err.println("File deletion failed: " + e.getMessage()); }
+    }
 }
 
 // --- AUDIT LOG ASPECT ---
