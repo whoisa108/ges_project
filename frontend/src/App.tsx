@@ -17,7 +17,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
     try {
       const res = await api.post('/auth/login', { employeeId, password });
@@ -70,7 +70,7 @@ const ResetPasswordPage = () => {
   const [confirm, setConfirm] = useState('');
   const navigate = useNavigate();
 
-  const handleReset = async (e: React.FormEvent) => {
+  const handleReset = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (password !== confirm) return alert('密碼不一致');
     try {
@@ -109,7 +109,7 @@ const RegisterPage = () => {
 
   const depts = ['AAID', 'BSID', 'ICSD', 'TSID', 'PLED', 'PEID'];
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.SubmitEvent) => {
     e.preventDefault();
     try {
       await api.post('/auth/register', formData);
@@ -231,7 +231,7 @@ const ProposePage = () => {
 
   const directions = ['綠色製造', '建立責任供應鏈', '打造健康共榮職場', '培育人才', '關懷弱勢'];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!file) return alert('請上傳點子報告');
     if (file.size > 5 * 1024 * 1024) return alert('檔案大小不得超過 5MB');
