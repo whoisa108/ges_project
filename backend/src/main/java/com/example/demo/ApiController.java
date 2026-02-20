@@ -9,6 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * ESG Idea Competition - API Controllers
  * Consolidates Auth, Proposal, and Admin APIs into one file.
@@ -100,6 +103,7 @@ public class ApiController {
             @RequestParam("category") String category,
             @RequestParam("direction") String direction,
             @RequestParam("summary") String summary,
+            @RequestParam(value = "teamMembers", required = false) String teamMembersJson,
             @RequestParam("file") MultipartFile file) {
         
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -131,6 +135,15 @@ public class ApiController {
         p.setSummary(summary);
         p.setFileName(fileName);
         p.setCreatedAt(LocalDateTime.now());
+
+        if (teamMembersJson != null && !teamMembersJson.isEmpty()) {
+            try {
+                List<TeamMember> teamMembers = new ObjectMapper().readValue(teamMembersJson, new TypeReference<List<TeamMember>>() {});
+                p.setTeamMembers(teamMembers);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Invalid team members format: " + e.getMessage());
+            }
+        }
         
         proposalRepository.save(p);
         return ResponseEntity.ok(p);

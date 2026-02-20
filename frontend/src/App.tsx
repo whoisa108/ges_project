@@ -225,11 +225,28 @@ const DashboardPage = () => {
 
 const ProposePage = () => {
   const [formData, setFormData] = useState({ title: '', category: 'I', direction: '綠色製造', summary: '' });
+  const [teamMembers, setTeamMembers] = useState<{ name: string, employeeId: string }[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const directions = ['綠色製造', '建立責任供應鏈', '打造健康共榮職場', '培育人才', '關懷弱勢'];
+
+  const addMember = () => {
+    if (teamMembers.length < 4) {
+      setTeamMembers([...teamMembers, { name: '', employeeId: '' }]);
+    }
+  };
+
+  const removeMember = (index: number) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== index));
+  };
+
+  const updateMember = (index: number, field: string, value: string) => {
+    const newMembers = [...teamMembers];
+    (newMembers[index] as any)[field] = value;
+    setTeamMembers(newMembers);
+  };
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -242,6 +259,7 @@ const ProposePage = () => {
     data.append('category', formData.category);
     data.append('direction', formData.direction);
     data.append('summary', formData.summary);
+    data.append('teamMembers', JSON.stringify(teamMembers.filter(m => m.name && m.employeeId)));
     data.append('file', file);
 
     try {
@@ -281,6 +299,35 @@ const ProposePage = () => {
           <div className="form-group">
             <label>點子摘要 (≤300字)</label>
             <textarea className="form-input" maxLength={300} required rows={4} value={formData.summary} onChange={e => setFormData({ ...formData, summary: e.target.value })} />
+          </div>
+
+          <div className="form-group">
+            <div className="flex justify-between" style={{ marginBottom: '10px', alignItems: 'center' }}>
+              <label style={{ marginBottom: 0 }}>隊友 (0-4人)</label>
+              {teamMembers.length < 4 && (
+                <button type="button" onClick={addMember} className="btn" style={{ padding: '4px 10px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)' }}>
+                  <Plus size={14} style={{ marginRight: '5px' }} /> 新增隊友
+                </button>
+              )}
+            </div>
+            <AnimatePresence>
+              {teamMembers.map((member, index) => (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  key={index}
+                  className="grid"
+                  style={{ gridTemplateColumns: '1fr 1fr auto', gap: '10px', marginBottom: '10px' }}
+                >
+                  <input className="form-input" placeholder="隊友姓名" value={member.name} onChange={e => updateMember(index, 'name', e.target.value)} />
+                  <input className="form-input" placeholder="隊友工號" value={member.employeeId} onChange={e => updateMember(index, 'employeeId', e.target.value)} />
+                  <button type="button" onClick={() => removeMember(index)} className="btn btn-danger" style={{ padding: '8px' }}>
+                    <Trash2 size={16} />
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
           <div className="form-group">
             <label>點子報告 (PDF/PPT, ≤5MB)</label>
