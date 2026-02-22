@@ -29,7 +29,7 @@ services:
       - mongodb
       - minio
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/esg_db
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/esg_db
       - MINIO_URL=http://minio:9000
 
   frontend:
