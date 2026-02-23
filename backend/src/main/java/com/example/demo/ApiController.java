@@ -257,10 +257,27 @@ public class ApiController {
 
     @DeleteMapping("/admin/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!"ADMIN".equals(user.getRole())) return ResponseEntity.status(403).build();
+        User user = (SecurityContextHolder.getContext().getAuthentication() != null) ? 
+                     (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal() : null;
+        if (user == null || !"ADMIN".equals(user.getRole())) return ResponseEntity.status(403).build();
         userRepository.deleteById(id);
         return ResponseEntity.ok("User deleted");
+    }
+
+    @PutMapping("/admin/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody Map<String, String> body) {
+        User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!"ADMIN".equals(admin.getRole())) return ResponseEntity.status(403).build();
+
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User u = userOpt.get();
+            if (body.containsKey("department")) u.setDepartment(body.get("department"));
+            if (body.containsKey("role")) u.setRole(body.get("role"));
+            userRepository.save(u);
+            return ResponseEntity.ok(u);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/admin/set-password")

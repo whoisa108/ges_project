@@ -385,6 +385,9 @@ const AdminPage = () => {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [deadline, setDeadline] = useState('');
   const [tab, setTab] = useState('proposals');
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ department: 'AAID', role: 'PROPOSER' });
+  const depts = ['AAID', 'BSID', 'ICSD', 'TSID', 'PLED', 'PEID'];
 
   const fetchData = async () => {
     try {
@@ -412,8 +415,24 @@ const AdminPage = () => {
 
   const deleteUser = async (id: string) => {
     if (!confirm('確認刪除此人員？')) return;
-    await api.delete(`/admin/users/${id}`);
-    setUsers(users.filter(u => u.id !== id));
+    try {
+      await api.delete(`/admin/users/${id}`);
+      setUsers(users.filter(u => u.id !== id));
+    } catch (e) { alert('刪除失敗'); }
+  };
+
+  const handleEditUser = (user: any) => {
+    setEditingUser(user);
+    setEditForm({ department: user.department, role: user.role });
+  };
+
+  const saveUserEdit = async () => {
+    try {
+      await api.put(`/admin/users/${editingUser.id}`, editForm);
+      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...editForm } : u));
+      setEditingUser(null);
+      alert('人員資料已更新');
+    } catch (e) { alert('更新失敗'); }
   };
 
   const deleteProposal = async (id: string) => {
@@ -493,7 +512,10 @@ const AdminPage = () => {
                   <td style={{ padding: '15px' }}>{u.department}</td>
                   <td style={{ padding: '15px' }}>{u.role}</td>
                   <td style={{ padding: '15px' }}>
-                    {u.employeeId !== 'admin' && <button className="btn btn-danger" onClick={() => deleteUser(u.id)} style={{ padding: '5px' }}><Trash2 size={16} /></button>}
+                    <div className="flex" style={{ gap: '10px' }}>
+                      <button className="btn" onClick={() => handleEditUser(u)} style={{ padding: '5px', background: 'rgba(255,255,255,0.05)' }} title="編輯人員"><Edit size={16} /></button>
+                      {u.employeeId !== 'admin' && <button className="btn btn-danger" onClick={() => deleteUser(u.id)} style={{ padding: '5px' }}><Trash2 size={16} /></button>}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -515,6 +537,34 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+
+      <Modal isOpen={!!editingUser} onClose={() => setEditingUser(null)} onConfirm={saveUserEdit} title="編輯人員資料" confirmText="儲存變更">
+        {editingUser && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div className="form-group">
+              <label>姓名 (不可編輯)</label>
+              <input className="form-input" value={editingUser.name} disabled style={{ opacity: 0.6 }} />
+            </div>
+            <div className="form-group">
+              <label>工號 (不可編輯)</label>
+              <input className="form-input" value={editingUser.employeeId} disabled style={{ opacity: 0.6 }} />
+            </div>
+            <div className="form-group">
+              <label>部門</label>
+              <select className="form-input" value={editForm.department} onChange={e => setEditForm({ ...editForm, department: e.target.value })}>
+                {depts.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>角色</label>
+              <select className="form-input" value={editForm.role} onChange={e => setEditForm({ ...editForm, role: e.target.value })}>
+                <option value="PROPOSER">提案人 (PROPOSER)</option>
+                <option value="ADMIN">管理員 (ADMIN)</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
