@@ -168,6 +168,84 @@ public class ApiController {
         return ResponseEntity.notFound().build();
     }
 
+    @PutMapping("/proposals/{id}")
+    public ResponseEntity<?> updateProposal(
+            @PathVariable String id,
+            @RequestParam("title") String title,
+            @RequestParam("category") String category,
+            @RequestParam("direction") String direction,
+            @RequestParam("summary") String summary,
+            @RequestParam(value = "teamMembers", required = false) String teamMembersJson,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+        
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Proposal> pOpt = proposalRepository.findById(id);
+        
+        if (pOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Proposal p = pOpt.get();
+
+        if (!p.getCreatorId().equals(user.getEmployeeId())) {
+            return ResponseEntity.status(403).body("Only creator can edit");
+        }
+
+        // Deadline check
+        Optional<Setting> deadline = settingRepository.findByKey("deadline");
+        if (deadline.isPresent() && LocalDateTime.now().isAfter(LocalDateTime.parse(deadline.get().getValue()))) {
+            return ResponseEntity.badRequest().body("Competition deadline has passed");
+        }
+
+        p.setTitle(title);
+        p.setCategory(category);
+        p.setDirection(direction);
+        p.setSummary(summary);
+
+        if (teamMembersJson != null && !teamMembersJson.isEmpty()) {
+            try {
+                List<TeamMember> teamMembers = new ObjectMapper().readValue(teamMembersJson, new TypeReference<List<TeamMember>>() {});
+                p.setTeamMembers(teamMembers);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Invalid team members format");
+            }
+        }
+
+        if (file != null && !file.isEmpty()) {
+            // Delete old file
+            if (p.getFileName() != null) storageService.deleteFile(p.getFileName());
+            
+            // Upload new file
+            String originalExt = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            String fileName = category + "_" + user.getDepartment() + "_" + user.getName() + "_" + user.getEmployeeId() + "_" + title + originalExt;
+            storageService.uploadFile(file, fileName);
+            p.setFileName(fileName);
+        }
+
+        proposalRepository.save(p);
+        return ResponseEntity.ok(p);
+    }
+
+    @GetMapping("/proposals/{id}/download")
+    public ResponseEntity<?> downloadFile(@PathVariable String id) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Proposal> pOpt = proposalRepository.findById(id);
+        
+        if (pOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Proposal p = pOpt.get();
+
+        if (!"ADMIN".equals(user.getRole()) && !p.getCreatorId().equals(user.getEmployeeId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        try {
+            io.minio.GetObjectResponse response = storageService.getFile(p.getFileName());
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + p.getFileName() + "\"")
+                    .header("Content-Type", response.headers().get("Content-Type"))
+                    .body(new org.springframework.core.io.InputStreamResource(response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Download failed: " + e.getMessage());
+        }
+    }
+
     // --- ADMIN CONTROLS ---
 
     @GetMapping("/admin/users")

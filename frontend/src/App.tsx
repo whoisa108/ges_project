@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { api, Header, Countdown, Modal } from './Components';
-import { Plus, Trash2, Calendar, FileText, Upload } from 'lucide-react';
+import { api, Header, Countdown, Modal, downloadFile } from './Components';
+import { Plus, Trash2, Calendar, Upload, Edit, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useParams } from 'react-router-dom';
 
 /**
  * ESG Idea Competition - Main App & Pages
@@ -205,8 +206,13 @@ const DashboardPage = () => {
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.summary}</p>
             </div>
             <div className="flex justify-between" style={{ width: '100%', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
-              <div className="flex" style={{ gap: '5px', color: 'var(--primary)', fontSize: '0.8rem' }}>
-                <FileText size={14} /> 附件已上傳
+              <div className="flex" style={{ gap: '10px' }}>
+                <button className="btn" onClick={() => downloadFile(p.id, p.fileName)} style={{ padding: '5px', background: 'rgba(255,255,255,0.05)' }} title="下載檔案">
+                  <Download size={16} />
+                </button>
+                <button className="btn" onClick={() => navigate(`/propose/${p.id}`)} style={{ padding: '5px', background: 'rgba(255,255,255,0.05)' }} title="編輯提案">
+                  <Edit size={16} />
+                </button>
               </div>
               <button className="btn btn-danger" onClick={() => setDeleteId(p.id)} style={{ padding: '5px' }}>
                 <Trash2 size={16} />
@@ -229,8 +235,26 @@ const ProposePage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = !!id;
 
   const directions = ['綠色製造', '建立責任供應鏈', '打造健康共榮職場', '培育人才', '關懷弱勢'];
+
+  useEffect(() => {
+    if (isEdit) {
+      const fetchProposal = async () => {
+        try {
+          const res = await api.get('/proposals');
+          const p = res.data.find((item: any) => item.id === id);
+          if (p) {
+            setFormData({ title: p.title, category: p.category, direction: p.direction, summary: p.summary });
+            setTeamMembers(p.teamMembers || []);
+          }
+        } catch (e) { console.error(e); }
+      };
+      fetchProposal();
+    }
+  }, [id, isEdit]);
 
   const addMember = () => {
     if (teamMembers.length < 4) {
@@ -250,8 +274,8 @@ const ProposePage = () => {
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    if (!file) return alert('請上傳點子報告');
-    if (file.size > 5 * 1024 * 1024) return alert('檔案大小不得超過 5MB');
+    if (!isEdit && !file) return alert('請上傳點子報告');
+    if (file && file.size > 5 * 1024 * 1024) return alert('檔案大小不得超過 5MB');
 
     setLoading(true);
     const data = new FormData();
@@ -260,14 +284,18 @@ const ProposePage = () => {
     data.append('direction', formData.direction);
     data.append('summary', formData.summary);
     data.append('teamMembers', JSON.stringify(teamMembers.filter(m => m.name && m.employeeId)));
-    data.append('file', file);
+    if (file) data.append('file', file);
 
     try {
-      await api.post('/proposals', data);
-      alert('上傳成功！');
+      if (isEdit) {
+        await api.put(`/proposals/${id}`, data);
+      } else {
+        await api.post('/proposals', data);
+      }
+      alert(isEdit ? '更新成功！' : '上傳成功！');
       navigate('/dashboard');
     } catch (err: any) {
-      alert(err.response?.data || '上傳失敗');
+      alert(err.response?.data || '操作失敗');
     } finally { setLoading(false); }
   };
 
@@ -275,7 +303,7 @@ const ProposePage = () => {
     <div className="container" style={{ maxWidth: '800px' }}>
       <Header />
       <div className="card glass">
-        <h1 style={{ marginBottom: '30px' }}>提交點子提案</h1>
+        <h1 style={{ marginBottom: '30px' }}>{isEdit ? '編輯點子提案' : '提交點子提案'}</h1>
         <form onSubmit={handleSubmit}>
           <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
             <div className="form-group">
@@ -330,9 +358,9 @@ const ProposePage = () => {
             </AnimatePresence>
           </div>
           <div className="form-group">
-            <label>點子報告 (PDF/PPT, ≤5MB)</label>
+            <label>點子報告 (PDF/PPT, ≤5MB) {isEdit && '(若不更新則不需上傳)'}</label>
             <div style={{ position: 'relative' }}>
-              <input type="file" accept=".pdf,.ppt,.pptx" required onChange={e => setFile(e.target.files?.[0] || null)} style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} />
+              <input type="file" accept=".pdf,.ppt,.pptx" required={!isEdit} onChange={e => setFile(e.target.files?.[0] || null)} style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} />
               <div className="form-input flex" style={{ justifyContent: 'center', gap: '10px', color: file ? 'var(--primary)' : 'var(--text-muted)' }}>
                 <Upload size={20} />
                 {file ? file.name : '點擊或拖曳檔案上傳'}
@@ -342,7 +370,7 @@ const ProposePage = () => {
           <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
             <button type="button" onClick={() => navigate('/dashboard')} className="btn" style={{ background: 'var(--border)' }}>取消</button>
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '上傳中...' : '正式提交'}
+              {loading ? '處理中...' : (isEdit ? '更新提案' : '正式提交')}
             </button>
           </div>
         </form>
@@ -433,7 +461,10 @@ const AdminPage = () => {
                   <td style={{ padding: '15px' }}>{p.creatorName} ({p.creatorId})</td>
                   <td style={{ padding: '15px' }}>{new Date(p.createdAt).toLocaleString()}</td>
                   <td style={{ padding: '15px', borderRadius: '0 8px 8px 0' }}>
-                    <button className="btn btn-danger" onClick={() => deleteProposal(p.id)} style={{ padding: '5px' }}><Trash2 size={16} /></button>
+                    <div className="flex" style={{ gap: '10px' }}>
+                      <button className="btn" onClick={() => downloadFile(p.id, p.fileName)} style={{ padding: '5px', background: 'rgba(255,255,255,0.05)' }} title="下載檔案"><Download size={16} /></button>
+                      <button className="btn btn-danger" onClick={() => deleteProposal(p.id)} style={{ padding: '5px' }}><Trash2 size={16} /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -500,6 +531,7 @@ const App = () => {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/propose" element={<ProtectedRoute><ProposePage /></ProtectedRoute>} />
+          <Route path="/propose/:id" element={<ProtectedRoute><ProposePage /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>

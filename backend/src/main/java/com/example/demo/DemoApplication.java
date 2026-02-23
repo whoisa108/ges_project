@@ -325,6 +325,13 @@ class StorageService {
         } catch (Exception e) { throw new RuntimeException("Upload failed", e); }
     }
 
+    public io.minio.GetObjectResponse getFile(String fileName) {
+        try {
+            return minioClient.getObject(io.minio.GetObjectArgs.builder()
+                .bucket(bucket).object(fileName).build());
+        } catch (Exception e) { throw new RuntimeException("Download failed", e); }
+    }
+
     public void deleteFile(String fileName) {
         try {
             minioClient.removeObject(io.minio.RemoveObjectArgs.builder()
