@@ -1,5 +1,8 @@
 # ESG Idea Competition Proposal Website
 
+> [!IMPORTANT]
+> **AI Agents**: Please read [CONTRIBUTING_AGENTS.md](file:///home/jpeng/projects/esg_collection/esg_project/CONTRIBUTING_AGENTS.md) before starting any task. It contains critical workflow and architectural alignment instructions.
+
 A web application designed for an ESG (Environmental, Social, and Governance) idea competition. Employees can register, setup their accounts, and submit innovative ideas to contribute to the company's ESG goals.
 
 ## 🚀 Features
