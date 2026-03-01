@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.esg.project.service;
 
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;

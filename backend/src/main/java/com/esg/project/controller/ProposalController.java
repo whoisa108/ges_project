@@ -1,9 +1,9 @@
-package com.example.demo.controller;
+package com.esg.project.controller;
 
-import com.example.demo.model.User;
-import com.example.demo.model.Proposal;
-import com.example.demo.service.ProposalService;
-import com.example.demo.service.StorageService;
+import com.esg.project.model.User;
+import com.esg.project.model.Proposal;
+import com.esg.project.service.ProposalService;
+import com.esg.project.service.StorageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;

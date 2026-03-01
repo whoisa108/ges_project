@@ -1,8 +1,8 @@
-package com.example.demo.config;
+package com.esg.project.config;
 
-import com.example.demo.model.AuditLog;
-import com.example.demo.model.User;
-import com.example.demo.repository.AuditLogRepository;
+import com.esg.project.model.AuditLog;
+import com.esg.project.model.User;
+import com.esg.project.repository.AuditLogRepository;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,7 +20,7 @@ public class AuditLogAspect {
         this.auditLogRepository = auditLogRepository;
     }
 
-    @AfterReturning(pointcut = "within(com.example.demo..*) && (@annotation(org.springframework.web.bind.annotation.PostMapping) || @annotation(org.springframework.web.bind.annotation.PutMapping) || @annotation(org.springframework.web.bind.annotation.DeleteMapping))", returning = "result")
+    @AfterReturning(pointcut = "within(com.esg.project..*) && (@annotation(org.springframework.web.bind.annotation.PostMapping) || @annotation(org.springframework.web.bind.annotation.PutMapping) || @annotation(org.springframework.web.bind.annotation.DeleteMapping))", returning = "result")
     public void logAction(JoinPoint joinPoint, Object result) {
         String methodName = joinPoint.getSignature().getName();
         String user = "Anonymous";

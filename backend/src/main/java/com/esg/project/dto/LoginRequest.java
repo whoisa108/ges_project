@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.esg.project.dto;
 
 public class LoginRequest {
     private String employeeId;

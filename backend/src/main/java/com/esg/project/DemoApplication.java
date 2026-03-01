@@ -1,9 +1,9 @@
-package com.example.demo;
+package com.esg.project;
 
-import com.example.demo.model.User;
-import com.example.demo.model.Setting;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.SettingRepository;
+import com.esg.project.model.User;
+import com.esg.project.model.Setting;
+import com.esg.project.repository.UserRepository;
+import com.esg.project.repository.SettingRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

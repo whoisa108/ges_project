@@ -1,7 +1,7 @@
-package com.example.demo.controller;
+package com.esg.project.controller;
 
-import com.example.demo.model.User;
-import com.example.demo.service.AdminService;
+import com.esg.project.model.User;
+import com.esg.project.service.AdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;

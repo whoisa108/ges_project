@@ -1,7 +1,7 @@
-package com.example.demo.config;
+package com.esg.project.config;
 
-import com.example.demo.repository.UserRepository;
-import com.example.demo.service.JwtService;
+import com.esg.project.repository.UserRepository;
+import com.esg.project.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

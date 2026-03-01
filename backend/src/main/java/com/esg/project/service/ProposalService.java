@@ -1,11 +1,11 @@
-package com.example.demo.service;
+package com.esg.project.service;
 
-import com.example.demo.model.User;
-import com.example.demo.model.Proposal;
-import com.example.demo.model.Setting;
-import com.example.demo.model.TeamMember;
-import com.example.demo.repository.ProposalRepository;
-import com.example.demo.repository.SettingRepository;
+import com.esg.project.model.User;
+import com.esg.project.model.Proposal;
+import com.esg.project.model.Setting;
+import com.esg.project.model.TeamMember;
+import com.esg.project.repository.ProposalRepository;
+import com.esg.project.repository.SettingRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;

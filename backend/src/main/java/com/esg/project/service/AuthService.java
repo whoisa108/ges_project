@@ -1,7 +1,7 @@
-package com.example.demo.service;
+package com.esg.project.service;
 
-import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.esg.project.model.User;
+import com.esg.project.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
-package com.example.demo.repository;
+package com.esg.project.repository;
 
-import com.example.demo.model.AuditLog;
+import com.esg.project.model.AuditLog;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

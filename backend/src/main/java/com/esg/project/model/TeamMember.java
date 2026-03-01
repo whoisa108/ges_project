@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package com.esg.project.model;
 
 public class TeamMember {
     private String name;

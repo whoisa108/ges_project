@@ -1,6 +1,6 @@
-package com.example.demo.service;
+package com.esg.project.service;
 
-import com.example.demo.model.User;
+import com.esg.project.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
