@@ -136,9 +136,9 @@ export const ProposePage = () => {
 
         try {
             if (isEdit) {
-                await api.put(`/proposals/${id}`, data);
+                await api.post(`/proposals/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
             } else {
-                await api.post('/proposals', data);
+                await api.post('/proposals', data, { headers: { 'Content-Type': 'multipart/form-data' } });
             }
             alert(isEdit ? '更新成功！' : '上傳成功！');
             navigate('/dashboard');
