@@ -71,7 +71,7 @@ public class ProposalController {
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public ResponseEntity<?> updateProposal(
             @PathVariable String id,
             @RequestParam("title") String title,
