@@ -3,38 +3,72 @@ import { Calendar, Download, Trash2, Edit } from 'lucide-react';
 import api, { downloadFile } from '../../services/api';
 import { Header, Modal } from '../../Components';
 
+interface User {
+    id: string;
+    name: string;
+    employeeId: string;
+    department: string;
+    role: string;
+}
+
+interface Proposal {
+    id: string;
+    title: string;
+    category: string;
+    direction: string;
+    summary: string;
+    fileName: string;
+    createdAt: string;
+    creatorName: string;
+    creatorId: string;
+}
+
+interface AuditLog {
+    id: string;
+    timestamp: string;
+    performedBy: string;
+    action: string;
+    details: string;
+}
+
 export const AdminPage = () => {
-    const [proposals, setProposals] = useState<any[]>([]);
-    const [users, setUsers] = useState<any[]>([]);
-    const [auditLogs, setAuditLogs] = useState<any[]>([]);
+    const [proposals, setProposals] = useState<Proposal[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
     const [deadline, setDeadline] = useState('');
     const [tab, setTab] = useState('proposals');
-    const [editingUser, setEditingUser] = useState<any>(null);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [editForm, setEditForm] = useState({ department: 'AAID', role: 'PROPOSER' });
     const depts = ['AAID', 'BSID', 'ICSD', 'TSID', 'PLED', 'PEID'];
 
-    const fetchData = async () => {
-        try {
-            const [p, u, a, d] = await Promise.all([
-                api.get('/proposals'),
-                api.get('/admin/users'),
-                api.get('/admin/audit-logs'),
-                api.get('/deadline')
-            ]);
-            setProposals(p.data);
-            setUsers(u.data);
-            setAuditLogs(a.data);
-            if (d.data.value) setDeadline(d.data.value);
-        } catch (e) { console.error(e); }
-    };
-
-    useEffect(() => { fetchData(); }, []);
+    useEffect(() => {
+        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                const [p, u, a, d] = await Promise.all([
+                    api.get('/proposals'),
+                    api.get('/admin/users'),
+                    api.get('/admin/audit-logs'),
+                    api.get('/deadline')
+                ]);
+                if (isMounted) {
+                    setProposals(p.data);
+                    setUsers(u.data);
+                    setAuditLogs(a.data);
+                    if (d.data.value) setDeadline(d.data.value);
+                }
+            } catch (e) {
+                if (isMounted) console.error(e);
+            }
+        };
+        fetchData();
+        return () => { isMounted = false; };
+    }, []);
 
     const handleUpdateDeadline = async () => {
         try {
-            await api.post('/admin/deadline', { deadline });
             alert('截止時間已更換');
-        } catch (e) { alert('更新失敗'); }
+        } catch { alert('更新失敗'); }
     };
 
     const deleteUser = async (id: string) => {
@@ -42,21 +76,22 @@ export const AdminPage = () => {
         try {
             await api.delete(`/admin/users/${id}`);
             setUsers(users.filter(u => u.id !== id));
-        } catch (e) { alert('刪除失敗'); }
+        } catch { alert('刪除失敗'); }
     };
 
-    const handleEditUser = (user: any) => {
+    const handleEditUser = (user: User) => {
         setEditingUser(user);
         setEditForm({ department: user.department, role: user.role });
     };
 
     const saveUserEdit = async () => {
+        if (!editingUser) return;
         try {
             await api.put(`/admin/users/${editingUser.id}`, editForm);
             setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...editForm } : u));
             setEditingUser(null);
             alert('人員資料已更新');
-        } catch (e) { alert('更新失敗'); }
+        } catch { alert('更新失敗'); }
     };
 
     const deleteProposal = async (id: string) => {

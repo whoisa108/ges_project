@@ -23,8 +23,9 @@ export const LoginPage = () => {
             } else {
                 navigate(res.data.role === 'ADMIN' ? '/admin' : '/dashboard');
             }
-        } catch (err: any) {
-            setError(err.response?.data || '登入失敗');
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: string } };
+            setError(error.response?.data || '登入失敗');
         }
     };
 
@@ -70,8 +71,9 @@ export const RegisterPage = () => {
             await api.post('/auth/register', formData);
             alert('註冊成功！請使用新密碼登入');
             navigate('/login');
-        } catch (err: any) {
-            setError(err.response?.data || '註冊失敗');
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: string } };
+            setError(error.response?.data || '註冊失敗');
         }
     };
 
@@ -124,7 +126,7 @@ export const ResetPasswordPage = () => {
             alert('密碼重設成功，請重新登入');
             localStorage.clear();
             navigate('/login');
-        } catch (e) { alert('重設失敗'); }
+        } catch { alert('重設失敗'); }
     };
 
     return (

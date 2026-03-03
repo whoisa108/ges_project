@@ -1,22 +1,22 @@
-import { useState, useEffect } from 'react';
-import axios, { type InternalAxiosRequestConfig } from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, LogOut, User } from 'lucide-react';
+import api from './services/api';
+
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    children: React.ReactNode;
+    onConfirm: () => void;
+    confirmText?: string;
+    danger?: boolean;
+}
 
 /**
  * Shared Components for ESG Project
  * Following "1-page-rule" - keeping common UI here.
  */
-
-export const api = axios.create({
-    baseURL: '/api'
-});
-
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('esg_token');
-    if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-});
 
 export const Header = () => {
     const navigate = useNavigate();
@@ -103,7 +103,7 @@ export const Countdown = () => {
     );
 };
 
-export const Modal = ({ isOpen, onClose, title, children, onConfirm, confirmText = "確認", danger = false }: any) => {
+export const Modal = ({ isOpen, onClose, title, children, onConfirm, confirmText = "確認", danger = false }: ModalProps) => {
     if (!isOpen) return null;
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
@@ -119,19 +119,3 @@ export const Modal = ({ isOpen, onClose, title, children, onConfirm, confirmText
     );
 };
 
-export const downloadFile = async (id: string, fileName: string) => {
-    try {
-        const res = await api.get(`/proposals/${id}/download`, { responseType: 'blob' });
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-    } catch (e) {
-        alert('下載失敗');
-        console.error(e);
-    }
-};

@@ -25,8 +25,10 @@ export const downloadFile = async (id: string, fileName: string) => {
         document.body.appendChild(link);
         link.click();
         link.remove();
+        window.URL.revokeObjectURL(url);
     } catch (e) {
         alert('下載失敗');
+        console.error(e);
     }
 };
 

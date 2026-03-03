@@ -11,16 +11,23 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class StorageService {
-    @Value("${minio.url}") private String url;
-    @Value("${minio.access-key}") private String accessKey;
-    @Value("${minio.secret-key}") private String secretKey;
-    @Value("${minio.bucket-name}") private String bucket;
+    private final MinioClient minioClient;
+    private final String bucket;
 
-    private MinioClient minioClient;
+    public StorageService(
+            @Value("${minio.url}") String url,
+            @Value("${minio.access-key}") String accessKey,
+            @Value("${minio.secret-key}") String secretKey,
+            @Value("${minio.bucket-name}") String bucket) {
+        this.bucket = bucket;
+        this.minioClient = MinioClient.builder()
+                .endpoint(url)
+                .credentials(accessKey, secretKey)
+                .build();
+    }
 
     @PostConstruct
     public void init() {
-        minioClient = MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();
         try {
             if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());

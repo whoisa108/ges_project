@@ -5,19 +5,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api, { downloadFile } from '../../services/api';
 import { Header, Countdown, Modal } from '../../Components';
 
+interface Proposal {
+    id: string;
+    title: string;
+    category: string;
+    direction: string;
+    summary: string;
+    fileName: string;
+    createdAt: string;
+    teamMembers?: { name: string, employeeId: string }[];
+}
+
 export const DashboardPage = () => {
-    const [proposals, setProposals] = useState<any[]>([]);
+    const [proposals, setProposals] = useState<Proposal[]>([]);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const fetchProposals = async () => {
-        try {
-            const res = await api.get('/proposals');
-            setProposals(res.data);
-        } catch (e) { console.error(e); }
-    };
-
-    useEffect(() => { fetchProposals(); }, []);
+    useEffect(() => {
+        const fetchProposals = async () => {
+            try {
+                const res = await api.get('/proposals');
+                setProposals(res.data);
+            } catch (e) { console.error(e); }
+        };
+        fetchProposals();
+    }, []);
 
     const handleDelete = async () => {
         if (!deleteId) return;
@@ -25,7 +37,7 @@ export const DashboardPage = () => {
             await api.delete(`/proposals/${deleteId}`);
             setProposals(proposals.filter(p => p.id !== deleteId));
             setDeleteId(null);
-        } catch (e) { alert('刪除失敗'); }
+        } catch { alert('刪除失敗'); }
     };
 
     return (
@@ -93,7 +105,7 @@ export const ProposePage = () => {
             const fetchProposal = async () => {
                 try {
                     const res = await api.get('/proposals');
-                    const p = res.data.find((item: any) => item.id === id);
+                    const p = res.data.find((item: Proposal) => item.id === id);
                     if (p) {
                         setFormData({ title: p.title, category: p.category, direction: p.direction, summary: p.summary });
                         setTeamMembers(p.teamMembers || []);
@@ -116,7 +128,7 @@ export const ProposePage = () => {
 
     const updateMember = (index: number, field: string, value: string) => {
         const newMembers = [...teamMembers];
-        (newMembers[index] as any)[field] = value;
+        (newMembers[index] as unknown as Record<string, string>)[field] = value;
         setTeamMembers(newMembers);
     };
 
@@ -142,8 +154,9 @@ export const ProposePage = () => {
             }
             alert(isEdit ? '更新成功！' : '上傳成功！');
             navigate('/dashboard');
-        } catch (err: any) {
-            alert(err.response?.data || '操作失敗');
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: string } };
+            alert(error.response?.data || '操作失敗');
         } finally { setLoading(false); }
     };
 
