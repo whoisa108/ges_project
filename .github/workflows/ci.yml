@@ -63,7 +63,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Fortify Scan
-        uses: fortify/github-action/sc-scan@v1
+        uses: fortify/github-action/sc-sast-scan@v1
         with:
           sc-url: ${{ secrets.FORTIFY_SC_URL }}
           sc-client-auth-token: ${{ secrets.FORTIFY_SC_CLIENT_AUTH_TOKEN }}
