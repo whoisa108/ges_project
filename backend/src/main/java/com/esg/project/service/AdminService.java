@@ -6,6 +6,7 @@ import com.esg.project.model.Setting;
 import com.esg.project.repository.UserRepository;
 import com.esg.project.repository.AuditLogRepository;
 import com.esg.project.repository.SettingRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,19 +14,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AdminService {
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
     private final SettingRepository settingRepository;
     private final BCryptPasswordEncoder encoder;
-
-    public AdminService(UserRepository userRepository, AuditLogRepository auditLogRepository, 
-                        SettingRepository settingRepository, BCryptPasswordEncoder encoder) {
-        this.userRepository = userRepository;
-        this.auditLogRepository = auditLogRepository;
-        this.settingRepository = settingRepository;
-        this.encoder = encoder;
-    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();

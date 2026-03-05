@@ -8,6 +8,7 @@ import com.esg.project.repository.ProposalRepository;
 import com.esg.project.repository.SettingRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,16 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProposalService {
     private final ProposalRepository proposalRepository;
     private final SettingRepository settingRepository;
     private final StorageService storageService;
-
-    public ProposalService(ProposalRepository proposalRepository, SettingRepository settingRepository, StorageService storageService) {
-        this.proposalRepository = proposalRepository;
-        this.settingRepository = settingRepository;
-        this.storageService = storageService;
-    }
 
     public List<Proposal> getProposals(User user) {
         if ("ADMIN".equals(user.getRole())) return proposalRepository.findAll();

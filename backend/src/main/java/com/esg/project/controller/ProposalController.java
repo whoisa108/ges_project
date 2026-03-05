@@ -4,6 +4,7 @@ import com.esg.project.model.User;
 import com.esg.project.model.Proposal;
 import com.esg.project.service.ProposalService;
 import com.esg.project.service.StorageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +15,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/proposals")
+@RequiredArgsConstructor
 public class ProposalController {
     private final ProposalService proposalService;
     private final StorageService storageService;
-
-    public ProposalController(ProposalService proposalService, StorageService storageService) {
-        this.proposalService = proposalService;
-        this.storageService = storageService;
-    }
 
     @GetMapping
     public List<Proposal> getProposals() {
