@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -46,14 +45,14 @@ public class ProposalControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(proposalController).build();
-        
+
         testUser = new User();
         testUser.setRole("USER");
         testUser.setEmployeeId("user-123");
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(testUser);
-        
+
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(auth);
         SecurityContextHolder.setContext(securityContext);
@@ -120,7 +119,7 @@ public class ProposalControllerTest {
         p.setFileName("test.pdf");
         p.setCreatorId("user-123");
         when(proposalService.findById("1")).thenReturn(Optional.of(p));
-        
+
         io.minio.GetObjectResponse mockResponse = mock(io.minio.GetObjectResponse.class);
         when(storageService.getFile("test.pdf")).thenReturn(mockResponse);
         when(mockResponse.headers()).thenReturn(okhttp3.Headers.of("Content-Type", "application/pdf"));

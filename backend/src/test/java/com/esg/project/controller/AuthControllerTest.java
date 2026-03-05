@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -74,7 +73,7 @@ public class AuthControllerTest {
         LoginRequest req = new LoginRequest();
         req.setEmployeeId("123");
         req.setPassword("pass");
-        
+
         when(authService.login("123", "pass")).thenReturn(Optional.of(new HashMap<>()));
 
         mockMvc.perform(post("/api/auth/login")
@@ -87,7 +86,7 @@ public class AuthControllerTest {
     void resetPassword_ReturnsOk() throws Exception {
         Map<String, String> body = new HashMap<>();
         body.put("password", "new-pass");
-        
+
         // Mock SecurityContext user
         User user = new User();
         user.setEmployeeId("user-123");
@@ -101,7 +100,7 @@ public class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk());
-        
+
         SecurityContextHolder.clearContext();
     }
 }

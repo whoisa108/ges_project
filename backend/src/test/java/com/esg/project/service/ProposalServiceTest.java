@@ -5,7 +5,6 @@ import com.esg.project.model.Setting;
 import com.esg.project.model.User;
 import com.esg.project.repository.ProposalRepository;
 import com.esg.project.repository.SettingRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,12 +96,13 @@ public class ProposalServiceTest {
     void createProposal_SavesAndReturns() throws Exception {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename()).thenReturn("test.pdf");
-        
+
         Proposal savedProposal = new Proposal();
         savedProposal.setTitle("Test Title");
         when(proposalRepository.save(any(Proposal.class))).thenReturn(savedProposal);
 
-        Proposal result = proposalService.createProposal(normalUser, "Test Title", "Category", "Direction", "Summary", null, mockFile);
+        Proposal result = proposalService.createProposal(normalUser, "Test Title", "Category", "Direction", "Summary",
+                null, mockFile);
 
         assertThat(result.getTitle()).isEqualTo("Test Title");
         verify(storageService).uploadFile(eq(mockFile), anyString());
@@ -125,7 +125,7 @@ public class ProposalServiceTest {
     void updateProposal_WithNewFile_DeletesOldAndSavesNew() throws Exception {
         Proposal existing = new Proposal();
         existing.setFileName("old.pdf");
-        
+
         MultipartFile newFile = mock(MultipartFile.class);
         when(newFile.isEmpty()).thenReturn(false);
         when(newFile.getOriginalFilename()).thenReturn("new.pdf");
@@ -168,7 +168,7 @@ public class ProposalServiceTest {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename()).thenReturn("test.pdf");
         String json = "[{\"name\":\"Member 1\", \"employeeId\":\"E123\"}]";
-        
+
         when(proposalRepository.save(any(Proposal.class))).thenAnswer(i -> i.getArguments()[0]);
 
         Proposal result = proposalService.createProposal(normalUser, "Title", "Cat", "Dir", "Sum", json, mockFile);
