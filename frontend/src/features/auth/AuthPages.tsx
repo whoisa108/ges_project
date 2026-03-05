@@ -13,7 +13,6 @@ export const LoginPage = () => {
         e.preventDefault();
         try {
             const res = await api.post('/auth/login', { employeeId, password });
-            localStorage.setItem('esg_token', res.data.token);
             localStorage.setItem('esg_role', res.data.role);
             localStorage.setItem('esg_user_name', res.data.name);
             localStorage.setItem('esg_employee_id', res.data.employeeId);

@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @RestController
@@ -26,10 +28,31 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         return authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword())
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .<ResponseEntity<?>>map(userData -> {
+                    String token = (String) userData.get("token");
+                    Cookie cookie = new Cookie("esg_token", token);
+                    cookie.setHttpOnly(true);
+                    cookie.setSecure(false); // Set to true in production with HTTPS
+                    cookie.setPath("/");
+                    cookie.setMaxAge(24 * 60 * 60); // 1 day
+                    response.addCookie(cookie);
+
+                    userData.remove("token");
+                    return ResponseEntity.ok(userData);
+                })
                 .orElse(ResponseEntity.status(401).body("Invalid credentials"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("esg_token", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return ResponseEntity.ok("Logged out successfully");
     }
 
     @PostMapping("/reset-password")
