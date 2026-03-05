@@ -82,7 +82,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Mend Unified Agent Scan
-        uses: whitesource/unified-agent-github-action@v1.0.0
+        uses: mend-toolkit/mend-unified-agent-github-action@latest
         env:
           WS_APIKEY: ${{ secrets.MEND_API_KEY }}
           WS_USERKEY: ${{ secrets.MEND_USER_KEY }}
