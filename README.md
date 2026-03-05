@@ -61,12 +61,28 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
+
 ### 3. Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+## 📖 API Documentation
+
+The backend includes interactive API documentation powered by Swagger/OpenAPI.
+
+1. **Access Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+2. **Access OpenAPI Spec (JSON)**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+The UI lists all available endpoints for:
+- `AdminController`
+- `AuthController`
+- `ProposalController`
+
+> [!TIP]
+> Use the **Authorize** button in Swagger UI to provide a JWT token (from `/api/auth/login`) to test protected endpoints.
 
 ## 📝 Configuration
 
