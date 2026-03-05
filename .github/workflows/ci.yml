@@ -47,44 +47,41 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-  fortify-scan:
+  codeql-scan:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
       actions: read
       contents: read
+    strategy:
+      matrix:
+        language: [ 'java', 'javascript' ]
     steps:
       - uses: actions/checkout@v4
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
       - name: Set up JDK 21
+        if: matrix.language == 'java'
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: maven
 
-      - name: Fortify Scan
-        uses: fortify/github-action@v1
+      - name: Build Java
+        if: matrix.language == 'java'
+        working-directory: backend
+        run: ./mvnw clean package -DskipTests
+
+      - name: Autobuild
+        if: matrix.language == 'javascript'
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
         with:
-          sast-scan: true
-        env:
-          SC_CONTROLLER_URL: ${{ secrets.FORTIFY_SC_URL }}
-          SC_CLIENT_AUTH_TOKEN: ${{ secrets.FORTIFY_SC_CLIENT_AUTH_TOKEN }}
-          SSC_URL: ${{ secrets.FORTIFY_SSC_URL }}
-          SSC_TOKEN: ${{ secrets.FORTIFY_SSC_TOKEN }}
-          SSC_APPVERSION: ESG-Project:1.0
-  mend-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Mend Unified Agent Scan
-        uses: mend-toolkit/mend-unified-agent-github-action@latest
-        env:
-          WS_APIKEY: ${{ secrets.MEND_API_KEY }}
-          WS_USERKEY: ${{ secrets.MEND_USER_KEY }}
-          WS_PRODUCTNAME: ESG-Project
-          WS_PROJECTNAME: ${{ github.ref_name }}
+          category: "/language:${{ matrix.language }}"
