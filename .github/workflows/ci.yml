@@ -63,13 +63,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Fortify Scan
-        uses: fortify/github-action/sc-sast-scan@v1
+        uses: fortify/github-action@v1
         with:
-          sc-url: ${{ secrets.FORTIFY_SC_URL }}
-          sc-client-auth-token: ${{ secrets.FORTIFY_SC_CLIENT_AUTH_TOKEN }}
-          ssc-url: ${{ secrets.FORTIFY_SSC_URL }}
-          ssc-auth-token: ${{ secrets.FORTIFY_SSC_TOKEN }}
-          ssc-application: ESG-Project
-          ssc-version: '1.0'
-          build-tool: maven
-          build-working-dir: backend
+          sast-scan: true
+        env:
+          SC_CONTROLLER_URL: ${{ secrets.FORTIFY_SC_URL }}
+          SC_CLIENT_AUTH_TOKEN: ${{ secrets.FORTIFY_SC_CLIENT_AUTH_TOKEN }}
+          SSC_URL: ${{ secrets.FORTIFY_SSC_URL }}
+          SSC_TOKEN: ${{ secrets.FORTIFY_SSC_TOKEN }}
+          SSC_APPVERSION: ESG-Project:1.0
+          PACKAGE_EXTRA_OPTS: -bt mvn -bf backend/pom.xml
